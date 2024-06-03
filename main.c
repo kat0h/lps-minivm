@@ -20,7 +20,9 @@ typedef enum {
   o_geqt,    // >=
   o_setval,  // {.i = <size_t>}
   o_loadval, // {.i = <size_t>}
-  o_print,
+  o_print_f,
+  o_print_i,
+  o_print_cr,
   o_jmp, // {.i = <size_t>}
   o_if,  // {.i = <size_t>}
   o_nif, // {.i = <size_t>}
@@ -38,19 +40,19 @@ int main() {
   // 計算のサンプル
   // p prg[] = {o_push,       {.v = 114.0}, o_setval, {.i = 0},  o_push,
   //            {.v = 514.0}, o_setval,     {.i = 1}, o_loadval, {.i = 0},
-  //            o_loadval,    {.i = 1},     o_add,    o_print,   o_end};
+  //            o_loadval,    {.i = 1},     o_add,    o_print_f,   o_end};
   // vm(prg, 2);
 
   // ループのサンプル
   // p prg[] = {o_push,   {.v = 0},  o_setval, {.i = 0}, o_loadval, {.i = 0},
-  //            o_print,  o_loadval, {.i = 0}, o_push,   {.v = 1},  o_add,
+  //            o_print_f,  o_loadval, {.i = 0}, o_push,   {.v = 1},  o_add,
   //            o_setval, {.i = 0},  o_jmp,    {.i = 4}};
   // vm(prg, 1);
 
   // 比較演算子のサンプル (1,0でOK)
-  // p prg[] = {o_push,   {.v = 1}, o_push,   {.v = 2}, o_lt,    o_print,
+  // p prg[] = {o_push,   {.v = 1}, o_push,   {.v = 2}, o_lt,    o_print_f,
   // o_push,
-  //            {.v = 1}, o_push,   {.v = 2}, o_gt,     o_print, o_end};
+  //            {.v = 1}, o_push,   {.v = 2}, o_gt,     o_print_f, o_end};
   // vm(prg, 0);
 
   // スタックが空で終わっているか
@@ -59,8 +61,13 @@ int main() {
 
   // 条件分岐のテスト(なにも表示されなければOK)
   // p prg[] = {o_push, {.v = 1.0},   o_if,    {.i = 8},
-  //            o_push, {.v = 999.0}, o_print, o_end};
+  //            o_push, {.v = 999.0}, o_print_f, o_end};
   // vm(prg, 0);
+
+  // 出力のサンプル
+  p prg[] = {o_push, {.v = 1.1}, o_print_f, o_print_cr,
+             o_push, {.v = 1.1}, o_print_i, o_print_cr};
+  vm(prg, 0);
 
   return 0;
 }
@@ -69,9 +76,10 @@ int main() {
 // vc : 変数の数
 void vm(p *prg, size_t vc) {
   static const void *ltbl[] = {
-      &&l_end,     &&l_push,  &&l_pop, &&l_add,  &&l_sub, &&l_mul,  &&l_div,
-      &&l_eq,      &&l_neq,   &&l_lt,  &&l_leqt, &&l_gt,  &&l_geqt, &&l_setval,
-      &&l_loadval, &&l_print, &&l_jmp, &&l_if,   &&l_nif};
+      &&l_end,  &&l_push,   &&l_pop,     &&l_add,     &&l_sub,     &&l_mul,
+      &&l_div,  &&l_eq,     &&l_neq,     &&l_lt,      &&l_leqt,    &&l_gt,
+      &&l_geqt, &&l_setval, &&l_loadval, &&l_print_f, &&l_print_i, &&l_print_cr,
+      &&l_jmp,  &&l_if,     &&l_nif};
   size_t pc = 0;
   number stack[STACK_SIZE];
   number *sp = stack;
@@ -129,8 +137,14 @@ l_setval:
 l_loadval:
   *sp++ = env[prg[pc++].i];
   goto *ltbl[prg[pc++].o];
-l_print:
-  printf("%f\n", *--sp);
+l_print_f:
+  printf("%f ", *--sp);
+  goto *ltbl[prg[pc++].o];
+l_print_i:
+  printf("%d ", (int)*--sp);
+  goto *ltbl[prg[pc++].o];
+l_print_cr:
+  puts("");
   goto *ltbl[prg[pc++].o];
 l_jmp:
   pc = prg[pc].i;

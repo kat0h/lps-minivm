@@ -65,9 +65,11 @@ int main() {
   // vm(prg, 0);
 
   // 出力のサンプル
-  p prg[] = {o_push, {.v = 1.1}, o_print_f, o_print_cr,
-             o_push, {.v = 1.1}, o_print_i, o_print_cr};
-  vm(prg, 0);
+  // p prg[] = {o_push, {.v = 1.1}, o_print_f, o_print_cr,
+  //            o_push, {.v = 1.1}, o_print_i, o_print_cr};
+  // vm(prg, 0);
+
+#include "./prg.c"
 
   return 0;
 }

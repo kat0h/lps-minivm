@@ -1,4 +1,7 @@
+let env = [];
+
 function compile(prg) {
+  env = [];
   return `p prg[] = {\n  ${
     compile_program(prg).join(",\n  ")
   },\n  o_end\n};\nvm(prg, 0);`;
@@ -10,11 +13,23 @@ function compile_program(prg) {
 
 function compile_stmt(stmt) {
   if (stmt[0] == "print_f") {
-    return [...compile_expr(stmt[1]), "o_print_f"];
+    return [...compile_expr(stmt[1], env), "o_print_f"];
   } else if (stmt[0] == "print_i") {
-    return [...compile_expr(stmt[1]), "o_print_i"];
+    return [...compile_expr(stmt[1], env), "o_print_i"];
   } else if (stmt[0] == "print_cr") {
     return ["o_print_cr"];
+  } else if (stmt[0] == "assign") {
+    const p = [];
+    p.push(...compile_expr(stmt[2]));
+    p.push("o_setval");
+    const index = env.indexOf(stmt[1]);
+    if (index == -1) {
+      env.push(stmt[1]);
+      p.push(`{.i = ${env.length - 1}}`);
+    } else {
+      p.push(`{.i = ${index}}`);
+    }
+    return p;
   }
   throw new Error(`Compile Error in compile_stmt ${stmt}`);
 }
@@ -36,14 +51,19 @@ function compile_expr(expr) {
     return ["o_push", `{.v = ${expr}}`];
   } else if (typeof expr == "object") {
     return [...compile_expr(expr[1]), ...compile_expr(expr[2]), op[expr[0]]];
+  } else if (typeof expr == "string") {
+    return ["o_loadval", `{.i = ${env.indexOf(expr)}}`];
   }
   throw new Error(`Compile Error in compile_expr ${expr}`);
 }
 
 const program = [
-  ["print_f", ["+", ["*", 3, 4], 2]],
-  ["print_cr"],
-  ["print_i", ["+", ["*", 3, 4], 2]],
+  ["assign", "a", 3],
+  ["print_f", ["+", ["*", "a", 4], 2]],
   ["print_cr"],
 ];
-console.log(compile(program));
+
+const fs = require("fs");
+const prg = compile(program);
+fs.writeFileSync("prg.c", prg);
+console.log(prg);

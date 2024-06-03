@@ -18,23 +18,24 @@ typedef enum {
   o_leqt,    // <=
   o_gt,      // >
   o_geqt,    // >=
-  o_setval,  // {.i = <size_t>}
-  o_loadval, // {.i = <size_t>}
+  o_setval,  // {.i = <int>}
+  o_loadval, // {.i = <int>}
   o_print_f,
   o_print_i,
   o_print_cr,
-  o_jmp, // {.i = <size_t>}
-  o_if,  // {.i = <size_t>}
-  o_nif, // {.i = <size_t>}
+  o_jmp,  // {.i = <int>}
+  o_jmpr, // {.i = <int>}
+  o_if,   // {.i = <int>}
+  o_nif,  // {.i = <int>}
 } opc;
 
 typedef union {
   opc o;
   number v;
-  size_t i;
+  int i;
 } p;
 
-void vm(p *prg, size_t vc);
+void vm(p *prg, int vc);
 
 int main() {
   // 計算のサンプル
@@ -69,20 +70,24 @@ int main() {
   //            o_push, {.v = 1.1}, o_print_i, o_print_cr};
   // vm(prg, 0);
 
-#include "./prg.c"
+  // relativeなjmp
+  // p prg[] = {o_jmpr, {.i = 5}, o_push, {.v = 1}, o_print_i, o_end};
+  // vm(prg, 0);
+
+// #include "./prg.c"
 
   return 0;
 }
 
 // prg: プログラム
 // vc : 変数の数
-void vm(p *prg, size_t vc) {
+void vm(p *prg, int vc) {
   static const void *ltbl[] = {
       &&l_end,  &&l_push,   &&l_pop,     &&l_add,     &&l_sub,     &&l_mul,
       &&l_div,  &&l_eq,     &&l_neq,     &&l_lt,      &&l_leqt,    &&l_gt,
       &&l_geqt, &&l_setval, &&l_loadval, &&l_print_f, &&l_print_i, &&l_print_cr,
-      &&l_jmp,  &&l_if,     &&l_nif};
-  size_t pc = 0;
+      &&l_jmp,  &&l_jmpr,   &&l_if,      &&l_nif};
+  int pc = 0;
   number stack[STACK_SIZE];
   number *sp = stack;
   number *env = (number *)calloc(vc, sizeof(number));
@@ -150,6 +155,9 @@ l_print_cr:
   goto *ltbl[prg[pc++].o];
 l_jmp:
   pc = prg[pc].i;
+  goto *ltbl[prg[pc++].o];
+l_jmpr:
+  pc += prg[pc].i - 1;
   goto *ltbl[prg[pc++].o];
 l_if:
   if (*--sp > 0.0)

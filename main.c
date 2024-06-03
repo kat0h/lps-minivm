@@ -27,6 +27,8 @@ typedef enum {
   o_jmpr, // {.i = <int>}
   o_if,   // {.i = <int>}
   o_nif,  // {.i = <int>}
+  o_ifr,  // {.i = <int>}
+  o_nifr, // {.i = <int>}
 } opc;
 
 typedef union {
@@ -74,7 +76,7 @@ int main() {
   // p prg[] = {o_jmpr, {.i = 5}, o_push, {.v = 1}, o_print_i, o_end};
   // vm(prg, 0);
 
-// #include "./prg.c"
+#include "./prg.c"
 
   return 0;
 }
@@ -86,7 +88,7 @@ void vm(p *prg, int vc) {
       &&l_end,  &&l_push,   &&l_pop,     &&l_add,     &&l_sub,     &&l_mul,
       &&l_div,  &&l_eq,     &&l_neq,     &&l_lt,      &&l_leqt,    &&l_gt,
       &&l_geqt, &&l_setval, &&l_loadval, &&l_print_f, &&l_print_i, &&l_print_cr,
-      &&l_jmp,  &&l_jmpr,   &&l_if,      &&l_nif};
+      &&l_jmp,  &&l_jmpr,   &&l_if,      &&l_nif, &&l_ifr, &&l_nifr};
   int pc = 0;
   number stack[STACK_SIZE];
   number *sp = stack;
@@ -168,6 +170,18 @@ l_nif:
   if (*--sp == 0.0)
     goto *ltbl[prg[pc = prg[pc].i].o];
   else
+    goto *ltbl[prg[(pc += 2) - 1].o];
+l_ifr:
+  if (*--sp > 0.0) {
+    pc += prg[pc].i - 1;
+    goto *ltbl[prg[pc++].o];
+  } else
+    goto *ltbl[prg[(pc += 2) - 1].o];
+l_nifr:
+  if (*--sp == 0.0) {
+    pc += prg[pc].i - 1;
+    goto *ltbl[prg[pc++].o];
+  } else
     goto *ltbl[prg[(pc += 2) - 1].o];
 l_end:
   // check stack is empty

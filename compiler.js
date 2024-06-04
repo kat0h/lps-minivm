@@ -44,6 +44,10 @@ function compile_stmt(stmt) {
     return [...compile_expr(stmt[1], env), "o_print_i"];
   } else if (stmt[0] == "print_cr") {
     return ["o_print_cr"];
+  } else if (stmt[0] == "print_str") {
+    return stmt[1].split("").map(
+      (i) => ["o_push", `{.v = ${i.charCodeAt(0)}}`, "o_print_ascii"]
+    ).flat();
   } else if (stmt[0] == "assign") {
     const p = [];
     p.push(...compile_expr(stmt[2]));
@@ -108,7 +112,7 @@ function compile_stmt(stmt) {
     }
     while ((i = body.indexOf("continue")) != -1) {
       body[i] = "o_jmpr";
-      body[i + 1] = `{.i = ${-i-2-cond.length}}`;
+      body[i + 1] = `{.i = ${-i - 2 - cond.length}}`;
     }
     p.push(...body);
     p.push(...upda);
@@ -145,28 +149,21 @@ function compile_expr(expr) {
   throw new Error(`Compile Error in compile_expr ${expr}`);
 }
 
+// [
+//   "for",
+//   [["assign", "i", 0], ["<", "i", 20], ["assign", "i", ["+", 1, "i"]]],
+//   [
+//     ["if", ["==", ["%", "i", 2], 0], [
+//       ["print_i", "i"],
+//       ["if", ["==", "i", 8], [
+//         ["assign", "i", 15],
+//         "continue"
+//       ]],
+//     ]],
+//   ],
+// ],
 const program = [
-  // ["assign", "a", 0],
-  // ["while", ["<", "a", 10], [
-  //   ["if", ["==", "a", 4], [["assign", "a", 5], "continue"]],
-  //   ["print_i", "a"],
-  //   ["while", 1, ["break"]],
-  //   ["assign", "a", ["+", "a", 1]],
-  //   ["if", ["==", "a", 7], ["break"]],
-  // ]],
-  [
-    "for",
-    [["assign", "i", 0], ["<", "i", 20], ["assign", "i", ["+", 1, "i"]]],
-    [
-      ["if", ["==", ["%", "i", 2], 0], [
-        ["print_i", "i"],
-        ["if", ["==", "i", 8], [
-          ["assign", "i", 15],
-          "continue"
-        ]],
-      ]],
-    ],
-  ],
+  ["print_str", "P3"],
 ];
 
 const fs = require("fs");

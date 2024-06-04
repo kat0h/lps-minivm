@@ -46,7 +46,7 @@ function compile_stmt(stmt) {
     return ["o_print_cr"];
   } else if (stmt[0] == "print_str") {
     return stmt[1].split("").map(
-      (i) => ["o_push", `{.v = ${i.charCodeAt(0)}}`, "o_print_ascii"]
+      (i) => ["o_push", `{.v = ${i.charCodeAt(0)}}`, "o_print_ascii"],
     ).flat();
   } else if (stmt[0] == "assign") {
     const p = [];
@@ -163,7 +163,49 @@ function compile_expr(expr) {
 //   ],
 // ],
 const program = [
-  ["print_str", "P3"],
+  ["print_str", "P3 \n"],
+
+  ["assign", "size", 4],
+  ["assign", "pixel", 1],
+
+  ["print_i", "pixel"],
+  ["print_i", "pixel"],
+  ["print_cr"],
+  ["print_i", 255],
+
+  ["for", [["assign", "i", 0], [">", "pixel", "i"], ["assign", "i", ["+", "i", 1]]], [
+    ["assign", "x", ["-", ["/", ["*", "i", "size"], "pixel"], ["/", "size", 2]]],
+    ["for", [["assign", "j", 0], [">", "pixel", "j"], ["assign", "j", ["+", "j", 1]]], [
+      ["assign", "y", ["-", ["/", ["*", "j", "size"], "pixel"], ["/", "size", 2]]],
+      ["assign", "a", 0],
+      ["assign", "b", 0],
+      ["assign", "d", 0],
+      ["for", [["assign", "k", 0], [">", 50, "k"], ["assign", "k", ["+", "k", 1]]], [
+        ["assign", "_a", ["+", ["-", ["*", "a", "a"], ["*", "b", "b"]], "x"]],
+        ["assign", "_b", ["+", ["*", ["*", 2, "a"], "b"], "y"]],
+        ["assign", "a", "_a"],
+        ["assign", "b", "_b"],
+        ["if", [">", ["+", ["*", "a", "a"], ["*", "b", "b"]], 4], [
+          ["assign", "d", 1],
+          "break",
+        ]],
+      ]],
+      ["if", "d", [
+        ["if", [">", ["*", "k", 12], 255], [
+          ["print_i", 255],
+        ], "else", [
+          ["print_i", ["*", "k", 12]],
+        ]],
+        ["print_i", 0],
+        ["print_i", 0],
+      ], "else", [
+        ["print_i", 255],
+        ["print_i", 255],
+        ["print_i", 255],
+      ]],
+    ]],
+    ["print_cr"],
+  ]],
 ];
 
 const fs = require("fs");

@@ -177,21 +177,9 @@ const program = [
   ["print_cr"],
   ["print_i", 255],
 
-  ["for", [["assign", "i", 0], [">", "pixel", "i"], ["assign", "i", [
-    "+",
-    "i",
-    1,
-  ]]], [
-    ["assign", "x", ["-", ["/", ["*", "i", "size"], "pixel"], [
-      "/",
-      "size",
-      2,
-    ]]],
-    ["for", [["assign", "j", 0], [">", "pixel", "j"], ["assign", "j", [
-      "+",
-      "j",
-      1,
-    ]]], [
+  ["for", [["assign", "i", 0], [">", "pixel", "i"], ["assign", "i", [ "+", "i", 1, ]]], [
+    ["assign", "x", ["-", ["/", ["*", "i", "size"], "pixel"], [ "/", "size", 2, ]]],
+    ["for", [["assign", "j", 0], [">", "pixel", "j"], ["assign", "j", [ "+", "j", 1, ]]], [
       ["assign", "y", ["-", ["/", ["*", "j", "size"], "pixel"], [
         "/",
         "size",
@@ -200,11 +188,7 @@ const program = [
       ["assign", "a", 0],
       ["assign", "b", 0],
       ["assign", "d", 0],
-      ["for", [["assign", "k", 0], [">", 50, "k"], ["assign", "k", [
-        "+",
-        "k",
-        1,
-      ]]], [
+      ["for", [["assign", "k", 0], [">", 50, "k"], ["assign", "k", [ "+", "k", 1, ]]], [
         ["assign", "_a", ["+", ["-", ["*", "a", "a"], ["*", "b", "b"]], "x"]],
         ["assign", "_b", ["+", ["*", ["*", 2, "a"], "b"], "y"]],
         ["assign", "a", "_a"],
@@ -214,26 +198,16 @@ const program = [
           "break",
         ]],
       ]],
-      [
-        "if",
-        "d",
-        [
-          [
-            "if",
-            [">", ["*", "k", 12], 255],
-            [
+      [ "if", "d", [
+          [ "if", [">", ["*", "k", 12], 255], [
               ["print_i", 255],
-            ],
-            "else",
-            [
+            ], "else", [
               ["print_i", ["*", "k", 12]],
             ],
           ],
           ["print_i", 0],
           ["print_i", 0],
-        ],
-        "else",
-        [
+        ], "else", [
           ["print_i", 255],
           ["print_i", 255],
           ["print_i", 255],

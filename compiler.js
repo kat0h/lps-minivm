@@ -90,6 +90,30 @@ function compile_stmt(stmt) {
     p.push(...stm);
     p.push("o_jmpr", `{.i = ${-stm.length - exp.length - 2}}`);
     return p;
+  } else if (stmt[0] == "for") {
+    const p = [];
+    const init = compile_stmt(stmt[1][0]);
+    const cond = compile_expr(stmt[1][1]);
+    const upda = compile_stmt(stmt[1][2]);
+    const body = compile_program(stmt[2]);
+
+    p.push(...init);
+    p.push(...cond);
+    p.push("o_nifr", `{.i = ${body.length + upda.length + 4}}`);
+    // break/continueの解決
+    let i;
+    while ((i = body.indexOf("break")) != -1) {
+      body[i] = "o_jmpr";
+      body[i + 1] = `{.i = ${body.length - i + upda.length + 2}}`;
+    }
+    while ((i = body.indexOf("continue")) != -1) {
+      body[i] = "o_jmpr";
+      body[i + 1] = `{.i = ${-i-2-cond.length}}`;
+    }
+    p.push(...body);
+    p.push(...upda);
+    p.push("o_jmpr", `{.i = ${-cond.length - body.length - upda.length - 2}}`);
+    return p;
   } else if (stmt == "break" || stmt == "continue") {
     // 後処理で数字分ズレないように
     return [stmt, null];
@@ -102,6 +126,7 @@ const op = {
   "-": "o_sub",
   "*": "o_mul",
   "/": "o_div",
+  "%": "o_mod",
   "==": "o_eq",
   "!=": "o_neq",
   "<": "o_lt",
@@ -121,13 +146,27 @@ function compile_expr(expr) {
 }
 
 const program = [
-  ["assign", "a", 0],
-  ["while", ["<", "a", 10], [
-    ["if", ["==", "a", 4], [["assign", "a", 5], "continue"]],
-    ["print_i", "a"],
-    ["assign", "a", ["+", "a", 1]],
-    ["if", ["==", "a", 7], ["break"]],
-  ]],
+  // ["assign", "a", 0],
+  // ["while", ["<", "a", 10], [
+  //   ["if", ["==", "a", 4], [["assign", "a", 5], "continue"]],
+  //   ["print_i", "a"],
+  //   ["while", 1, ["break"]],
+  //   ["assign", "a", ["+", "a", 1]],
+  //   ["if", ["==", "a", 7], ["break"]],
+  // ]],
+  [
+    "for",
+    [["assign", "i", 0], ["<", "i", 20], ["assign", "i", ["+", 1, "i"]]],
+    [
+      ["if", ["==", ["%", "i", 2], 0], [
+        ["print_i", "i"],
+        ["if", ["==", "i", 8], [
+          ["assign", "i", 15],
+          "continue"
+        ]],
+      ]],
+    ],
+  ],
 ];
 
 const fs = require("fs");

@@ -12,6 +12,7 @@ typedef enum {
   o_sub,     // -
   o_mul,     // *
   o_div,     // /
+  o_mod,     // %
   o_eq,      // ==
   o_neq,     // !=
   o_lt,      // <
@@ -85,10 +86,11 @@ int main() {
 // vc : 変数の数
 void vm(p *prg, int vc) {
   static const void *ltbl[] = {
-      &&l_end,  &&l_push,   &&l_pop,     &&l_add,     &&l_sub,     &&l_mul,
-      &&l_div,  &&l_eq,     &&l_neq,     &&l_lt,      &&l_leqt,    &&l_gt,
-      &&l_geqt, &&l_setval, &&l_loadval, &&l_print_f, &&l_print_i, &&l_print_cr,
-      &&l_jmp,  &&l_jmpr,   &&l_if,      &&l_nif, &&l_ifr, &&l_nifr};
+      &&l_end,     &&l_push,    &&l_pop,     &&l_add,      &&l_sub,
+      &&l_mul,     &&l_div,     &&l_mod,     &&l_eq,       &&l_neq,
+      &&l_lt,      &&l_leqt,    &&l_gt,      &&l_geqt,     &&l_setval,
+      &&l_loadval, &&l_print_f, &&l_print_i, &&l_print_cr, &&l_jmp,
+      &&l_jmpr,    &&l_if,      &&l_nif,     &&l_ifr,      &&l_nifr};
   int pc = 0;
   number stack[STACK_SIZE];
   number *sp = stack;
@@ -114,6 +116,10 @@ l_mul:
   goto *ltbl[prg[pc++].o];
 l_div:
   *(sp - 2) = *(sp - 2) / *(sp - 1);
+  sp--;
+  goto *ltbl[prg[pc++].o];
+l_mod:
+  *(sp - 2) = (int)*(sp - 2) % (int)*(sp - 1);
   sp--;
   goto *ltbl[prg[pc++].o];
 l_eq:

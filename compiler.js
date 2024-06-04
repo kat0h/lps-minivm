@@ -5,6 +5,7 @@
 // o_sub,     // -
 // o_mul,     // *
 // o_div,     // /
+// o_mod,     // %
 // o_eq,      // ==
 // o_neq,     // !=
 // o_lt,      // <
@@ -16,6 +17,7 @@
 // o_print_f,
 // o_print_i,
 // o_print_cr,
+// o_print_ascii,
 // o_jmp,  // {.i = <int>}
 // o_jmpr, // {.i = <int>}
 // o_if,   // {.i = <int>}
@@ -27,9 +29,11 @@ let env = [];
 
 function compile(prg) {
   env = [];
-  return `p prg[] = {\n  ${
+  const op = `p prg[] = {\n  ${
     compile_program(prg).join(",\n  ")
-  },\n  o_end\n};\nvm(prg, 0);`;
+  },\n  o_end\n};\n`;
+  const vm = `vm(prg, ${env.length});\n`;
+  return `${op}${vm}`;
 }
 
 function compile_program(prg) {
@@ -166,21 +170,41 @@ const program = [
   ["print_str", "P3 \n"],
 
   ["assign", "size", 4],
-  ["assign", "pixel", 1],
+  ["assign", "pixel", 1000],
 
   ["print_i", "pixel"],
   ["print_i", "pixel"],
   ["print_cr"],
   ["print_i", 255],
 
-  ["for", [["assign", "i", 0], [">", "pixel", "i"], ["assign", "i", ["+", "i", 1]]], [
-    ["assign", "x", ["-", ["/", ["*", "i", "size"], "pixel"], ["/", "size", 2]]],
-    ["for", [["assign", "j", 0], [">", "pixel", "j"], ["assign", "j", ["+", "j", 1]]], [
-      ["assign", "y", ["-", ["/", ["*", "j", "size"], "pixel"], ["/", "size", 2]]],
+  ["for", [["assign", "i", 0], [">", "pixel", "i"], ["assign", "i", [
+    "+",
+    "i",
+    1,
+  ]]], [
+    ["assign", "x", ["-", ["/", ["*", "i", "size"], "pixel"], [
+      "/",
+      "size",
+      2,
+    ]]],
+    ["for", [["assign", "j", 0], [">", "pixel", "j"], ["assign", "j", [
+      "+",
+      "j",
+      1,
+    ]]], [
+      ["assign", "y", ["-", ["/", ["*", "j", "size"], "pixel"], [
+        "/",
+        "size",
+        2,
+      ]]],
       ["assign", "a", 0],
       ["assign", "b", 0],
       ["assign", "d", 0],
-      ["for", [["assign", "k", 0], [">", 50, "k"], ["assign", "k", ["+", "k", 1]]], [
+      ["for", [["assign", "k", 0], [">", 50, "k"], ["assign", "k", [
+        "+",
+        "k",
+        1,
+      ]]], [
         ["assign", "_a", ["+", ["-", ["*", "a", "a"], ["*", "b", "b"]], "x"]],
         ["assign", "_b", ["+", ["*", ["*", 2, "a"], "b"], "y"]],
         ["assign", "a", "_a"],
@@ -190,19 +214,31 @@ const program = [
           "break",
         ]],
       ]],
-      ["if", "d", [
-        ["if", [">", ["*", "k", 12], 255], [
+      [
+        "if",
+        "d",
+        [
+          [
+            "if",
+            [">", ["*", "k", 12], 255],
+            [
+              ["print_i", 255],
+            ],
+            "else",
+            [
+              ["print_i", ["*", "k", 12]],
+            ],
+          ],
+          ["print_i", 0],
+          ["print_i", 0],
+        ],
+        "else",
+        [
           ["print_i", 255],
-        ], "else", [
-          ["print_i", ["*", "k", 12]],
-        ]],
-        ["print_i", 0],
-        ["print_i", 0],
-      ], "else", [
-        ["print_i", 255],
-        ["print_i", 255],
-        ["print_i", 255],
-      ]],
+          ["print_i", 255],
+          ["print_i", 255],
+        ],
+      ],
     ]],
     ["print_cr"],
   ]],

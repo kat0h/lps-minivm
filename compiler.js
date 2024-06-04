@@ -20,6 +20,8 @@
 // o_jmpr, // {.i = <int>}
 // o_if,   // {.i = <int>}
 // o_nif,  // {.i = <int>}
+// o_ifr,  // {.i = <int>}
+// o_nifr, // {.i = <int>}
 
 let env = [];
 
@@ -31,6 +33,7 @@ function compile(prg) {
 }
 
 function compile_program(prg) {
+  // return prg.map((stmt) => [`//${stmt}`, ...compile_stmt(stmt)]).flat();
   return prg.map((stmt) => compile_stmt(stmt)).flat();
 }
 
@@ -58,7 +61,9 @@ function compile_stmt(stmt) {
     p.push(...compile_expr(stmt[1]));
     p.push("o_nifr");
     const s = compile_program(stmt[2]);
-    p.push(`{.i = ${s.length + 1 + (stmt.length > 3 && stmt[3] == "else" ? 3 : 0) }}`);
+    p.push(
+      `{.i = ${s.length + 1 + (stmt.length > 3 && stmt[3] == "else" ? 3 : 1)}}`,
+    );
     p.push(...s);
     if (stmt.length > 3 && stmt[3] == "else") {
       const s = compile_program(stmt[4]);
@@ -66,6 +71,28 @@ function compile_stmt(stmt) {
       p.push(...s);
     }
     return p;
+  } else if (stmt[0] == "while") {
+    const p = [];
+    const exp = compile_expr(stmt[1]);
+    const stm = compile_program(stmt[2]);
+    p.push(...exp);
+    p.push("o_nifr", `{.i = ${stm.length + 4}}`);
+    // break/continueの解決
+    let i;
+    while ((i = stm.indexOf("break")) != -1) {
+      stm[i] = "o_jmpr";
+      stm[i + 1] = `{.i = ${stm.length - i + 2}}`;
+    }
+    while ((i = stm.indexOf("continue")) != -1) {
+      stm[i] = "o_jmpr";
+      stm[i + 1] = `{.i = ${-i - exp.length - 2}}`;
+    }
+    p.push(...stm);
+    p.push("o_jmpr", `{.i = ${-stm.length - exp.length - 2}}`);
+    return p;
+  } else if (stmt == "break" || stmt == "continue") {
+    // 後処理で数字分ズレないように
+    return [stmt, null];
   }
   throw new Error(`Compile Error in compile_stmt ${stmt}`);
 }
@@ -94,14 +121,13 @@ function compile_expr(expr) {
 }
 
 const program = [
-  [
-    "if", 1, [
-      ["print_i", 111],
-    ],
-    "else", [
-      ["print_i", 222],
-    ],
-  ],
+  ["assign", "a", 0],
+  ["while", ["<", "a", 10], [
+    ["if", ["==", "a", 4], [["assign", "a", 5], "continue"]],
+    ["print_i", "a"],
+    ["assign", "a", ["+", "a", 1]],
+    ["if", ["==", "a", 7], ["break"]],
+  ]],
 ];
 
 const fs = require("fs");

@@ -158,42 +158,7 @@ l_end:
 }
 
 int main() {
-  // 計算のサンプル
-  // p prg[] = {o_push,       {.v = 114.0}, o_setval, {.i = 0},  o_push,
-  //            {.v = 514.0}, o_setval,     {.i = 1}, o_loadval, {.i = 0},
-  //            o_loadval,    {.i = 1},     o_add,    o_print_f,   o_end};
-  // vm(prg, 2);
-
-  // ループのサンプル
-  // p prg[] = {o_push,   {.v = 0},  o_setval, {.i = 0}, o_loadval, {.i = 0},
-  //            o_print_f,  o_loadval, {.i = 0}, o_push,   {.v = 1},  o_add,
-  //            o_setval, {.i = 0},  o_jmp,    {.i = 4}};
-  // vm(prg, 1);
-
-  // 比較演算子のサンプル (1,0でOK)
-  // p prg[] = {o_push,   {.v = 1}, o_push,   {.v = 2}, o_lt,    o_print_f,
-  // o_push,
-  //            {.v = 1}, o_push,   {.v = 2}, o_gt,     o_print_f, o_end};
-  // vm(prg, 0);
-
-  // スタックが空で終わっているか
-  // p prg[] = {o_push, {.v = 1.0}, o_end};
-  // vm(prg, 0);
-
-  // 条件分岐のテスト(なにも表示されなければOK)
-  // p prg[] = {o_push, {.v = 1.0},   o_if,    {.i = 8},
-  //            o_push, {.v = 999.0}, o_print_f, o_end};
-  // vm(prg, 0);
-
-  // 出力のサンプル
-  // p prg[] = {o_push, {.v = 1.1}, o_print_f, o_print_cr,
-  //            o_push, {.v = 1.1}, o_print_i, o_print_cr};
-  // vm(prg, 0);
-
-  // relativeなjmp
-  // p prg[] = {o_jmpr, {.i = 5}, o_push, {.v = 1}, o_print_i, o_end};
-  // vm(prg, 0);
-
+  // マンデルブロ集合を描画するサンプル
   p prg[] = {
       0x1,        0x42a00000, 0x13,       0x1,        0x424c0000, 0x13,
       0x1,        0x42000000, 0x13,       0x1,        0x41200000, 0x13,

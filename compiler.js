@@ -1,30 +1,3 @@
-// o_end,
-// o_push, // {.v = <number>}
-// o_pop,
-// o_add,     // +
-// o_sub,     // -
-// o_mul,     // *
-// o_div,     // /
-// o_mod,     // %
-// o_eq,      // ==
-// o_neq,     // !=
-// o_lt,      // <
-// o_leqt,    // <=
-// o_gt,      // >
-// o_geqt,    // >=
-// o_setval,  // {.i = <int>}
-// o_loadval, // {.i = <int>}
-// o_print_f,
-// o_print_i,
-// o_print_cr,
-// o_print_ascii,
-// o_jmp,  // {.i = <int>}
-// o_jmpr, // {.i = <int>}
-// o_if,   // {.i = <int>}
-// o_nif,  // {.i = <int>}
-// o_ifr,  // {.i = <int>}
-// o_nifr, // {.i = <int>}
-
 let env = [];
 
 function compile(prg) {
@@ -218,7 +191,5 @@ const program = [
   ]],
 ];
 
-const fs = require("fs");
 const prg = compile(program);
-fs.writeFileSync("prg.c", prg);
 console.log(prg);
